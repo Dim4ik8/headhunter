@@ -1,14 +1,24 @@
 import requests
+from pprint import pprint
 
 def main():
     url = 'https://api.hh.ru/vacancies/'
-    params = {'text': 'программист', 'per_page': '100', 'search_field': 'name', 'premium': True, 'area': '1',
-              'date_from': '2022-10-04'}
-    response = requests.get(url, params=params)
-    response.raise_for_status()
+    languages = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
 
-    vacancies = response.json()
-    print(vacancies)
+    statistics = {}
+    for language in languages:
+        params = {'text': f'программист {language}', 'per_page': '100', "search_field": "name", 'premium': True,
+                  'area': '1'}
+
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+
+        vacancies = response.json()
+        if int(vacancies['found']) > 100:
+            statistics[language] = vacancies['found']
+
+    pprint(statistics)
+
 
 if __name__ == '__main__':
     main()
