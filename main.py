@@ -1,13 +1,14 @@
 import requests
 from pprint import pprint
 
+
 def main():
     url = 'https://api.hh.ru/vacancies/'
     languages = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
 
     statistics = {}
     for language in languages:
-        params = {'text': f'программист {language}', 'per_page': '100', "search_field": "name", 'premium': True,
+        params = {'text': f'программист {language}', 'search_field': 'name', 'premium': True,
                   'area': '1'}
 
         response = requests.get(url, params=params)
@@ -18,6 +19,15 @@ def main():
             statistics[language] = vacancies['found']
 
     pprint(statistics)
+
+    params = {'text': 'программист Python', 'search_field': 'name', 'premium': True,
+              'area': '1'}
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    vacancies = response.json()
+
+    for vacancy in vacancies['items']:
+        print(vacancy['salary'])
 
 
 if __name__ == '__main__':
