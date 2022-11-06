@@ -3,3 +3,4 @@ venv/
 11.json
 rrr.py
 __pycache__/
+.env
