@@ -1,6 +1,9 @@
 import requests
 from pprint import pprint
+from itertools import count
 
+url = 'https://api.hh.ru/vacancies/'
+languages = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
 
 def predict_rub_salary(vacancy):
     if vacancy['salary'] and vacancy['salary']['currency'] == "RUR":
@@ -13,45 +16,50 @@ def predict_rub_salary(vacancy):
     else:
         return None
 
+def get_developer_salary_info(language):
+    list_of_vacancies = []
 
-def main():
-    url = 'https://api.hh.ru/vacancies/'
-    languages = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
+    for page in count(0):
+
+        params = {'text': f'программист {language}', 'search_field': 'name', 'premium': True,
+                  'area': '1', 'page': {page}}
+        page_response = requests.get(url, params=params)
+        page_response.raise_for_status()
+
+        vacancies = page_response.json()
+
+        if vacancies['items']:
+            list_of_vacancies.append(vacancies)
+
+        else:
+            break
 
     statistics_for_salary = {}
+    vacancies_processed = 0
+    sum_of_salaries = 0
+    for page in list_of_vacancies:
 
-    for num, language in enumerate(languages):
-        params = {'text': f'программист {language}', 'search_field': 'name', 'premium': True,
-                  'area': '1'}
+        for vacancy in page['items']:
 
-        response = requests.get(url, params=params)
-        response.raise_for_status()
+            if predict_rub_salary(vacancy):
+                vacancies_processed += 1
+                sum_of_salaries += predict_rub_salary(vacancy)
 
-        vacancies = response.json()
+    average_salary = round((sum_of_salaries)/vacancies_processed)
 
-        if vacancies['found'] > 100:
-            statistics_for_salary[languages[num]] = {'vacancies_found': vacancies['found']}
-            vacancies_processed = 0
-            av_salary = 0
-            for i, vacancy in enumerate(vacancies['items']):
-                if predict_rub_salary(vacancy):
-                    vacancies_processed += 1
-                    av_salary += predict_rub_salary(vacancy)
+    statistics_for_salary[language] = {'vacancies_found': list_of_vacancies[0]['found']}
+    statistics_for_salary[language].update({'vacancies_processed': vacancies_processed })
+    statistics_for_salary[language].update({'average_salary': average_salary })
 
-            statistics_for_salary[languages[num]].update({'vacancies_processed': vacancies_processed})
-            average_salary = int(av_salary / vacancies_processed)
-            statistics_for_salary[languages[num]].update({'average_salary': average_salary})
+    return statistics_for_salary
 
-    pprint(statistics_for_salary)
+def main():
 
-    params = {'text': 'программист Python', 'search_field': 'name', 'premium': True,
-              'area': '1'}
-    response = requests.get(url, params=params)
-    response.raise_for_status()
-    vacancies = response.json()
+    for language in languages:
+        print(get_developer_salary_info(language))
 
-    for vacancy in vacancies['items']:
-        print(predict_rub_salary(vacancy))
+
+
 
 
 if __name__ == '__main__':
