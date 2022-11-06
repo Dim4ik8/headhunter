@@ -54,9 +54,12 @@ def get_developer_salary_info(language):
     return statistics_for_salary
 
 def main():
+    try:
+        for language in languages:
+            print(get_developer_salary_info(language))
+    except requests.exceptions.HTTPError as error:
+        exit("Can't get data from server:\n{0}".format(error))
 
-    for language in languages:
-        print(get_developer_salary_info(language))
 
 
 
