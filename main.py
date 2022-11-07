@@ -4,9 +4,9 @@ from terminaltables import AsciiTable
 from dotenv import load_dotenv
 import os
 
-url_hh = 'https://api.hh.ru/vacancies/'
-url_superjob = 'https://api.superjob.ru/2.0/vacancies/'
-languages = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
+HH_URL = 'https://api.hh.ru/vacancies/'
+SUPERJOB_URL = 'https://api.superjob.ru/2.0/vacancies/'
+LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
 
 
 def predict_rub_salary(vacancy):
@@ -40,7 +40,7 @@ def get_developer_salary_info(language):
 
         params = {'text': f'программист {language}', 'search_field': 'name', 'premium': True,
                   'area': '1', 'page': {page}}
-        page_response = requests.get(url_hh, params=params)
+        page_response = requests.get(HH_URL, params=params)
         page_response.raise_for_status()
 
         vacancies = page_response.json()
@@ -78,7 +78,7 @@ def get_developer_salary_info_for_superJob(language):
 
         params = {'keyword': f'программист {language}', 'page': {page}}
         headers = {'X-Api-App-Id': secret_key}
-        response = requests.get(url_superjob, params=params, headers=headers)
+        response = requests.get(SUPERJOB_URL, params=params, headers=headers)
         response.raise_for_status()
 
         vacancies = response.json()
@@ -115,7 +115,7 @@ def main():
     table_data_superjob = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
     try:
 
-        for language in languages:
+        for language in LANGUAGES:
             a = []
             get_developer_salary_info_for_superJob(language)
             for key, value in get_developer_salary_info_for_superJob(language).items():
@@ -131,7 +131,7 @@ def main():
     table_data_hh = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
     try:
 
-        for language in languages:
+        for language in LANGUAGES:
             a = []
             get_developer_salary_info(language)
             for key, value in get_developer_salary_info(language).items():
