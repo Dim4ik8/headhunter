@@ -7,7 +7,7 @@ import os
 HH_URL = 'https://api.hh.ru/vacancies/'
 SUPERJOB_URL = 'https://api.superjob.ru/2.0/vacancies/'
 LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
-
+TABLE_DATA_HEADERS = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
 
 def predict_rub_salary(vacancy):
     if vacancy['salary'] and vacancy['salary']['currency'] == "RUR":
@@ -112,7 +112,6 @@ def get_developer_salary_info_for_superJob(language):
 def main():
     load_dotenv()
 
-    table_data_superjob = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
     try:
 
         for language in LANGUAGES:
@@ -121,14 +120,13 @@ def main():
             for key, value in get_developer_salary_info_for_superJob(language).items():
                 a.extend([key, value['vacancies_found'], value['vacancies_processed'], value['average_salary']])
 
-            table_data_superjob.append(a)
+            TABLE_DATA_HEADERS.append(a)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:\n{0}".format(error))
 
-    table = AsciiTable(table_data_superjob, title='SuperJobMoscow')
+    table = AsciiTable(TABLE_DATA_HEADERS, title='SuperJobMoscow')
     print(table.table)
 
-    table_data_hh = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
     try:
 
         for language in LANGUAGES:
@@ -137,13 +135,13 @@ def main():
             for key, value in get_developer_salary_info(language).items():
                 a.extend([key, value['vacancies_found'], value['vacancies_processed'], value['average_salary']])
 
-            table_data_hh.append(a)
+            TABLE_DATA_HEADERS.append(a)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:\n{0}".format(error))
 
 
-    table_hh = AsciiTable(table_data_hh, title='SuperJobMoscow')
-    print(table_hh.table)
+    table = AsciiTable(TABLE_DATA_HEADERS, title='HeadhunterMoscow')
+    print(table.table)
 
 if __name__ == '__main__':
     main()
