@@ -33,7 +33,7 @@ def predict_rub_salary_for_superJob(vacancy):
         return None
 
 
-def get_developer_salary_info(language):
+def get_developer_salary_for_hh(language):
     list_of_vacancies = []
 
     for page in count(0):
@@ -71,7 +71,7 @@ def get_developer_salary_info(language):
     return statistics_for_salary
 
 
-def get_developer_salary_info_for_superJob(language):
+def get_developer_salary_for_superJob(language):
     list_of_vacancies = []
     secret_key = os.getenv('SUPERJOB_KEY')
     for page in count(0):
@@ -116,7 +116,7 @@ def main():
 
         for language in LANGUAGES:
             vacancies_in_table = []
-            for key, value in get_developer_salary_info_for_superJob(language).items():
+            for key, value in get_developer_salary_for_superJob(language).items():
                 vacancies_in_table.extend([key, value['vacancies_found'], value['vacancies_processed'], value['average_salary']])
 
             TABLE_DATA_HEADERS.append(vacancies_in_table)
@@ -130,7 +130,7 @@ def main():
 
         for language in LANGUAGES:
             vacancies_in_table = []
-            for language, vacancies in get_developer_salary_info(language).items():
+            for language, vacancies in get_developer_salary_for_hh(language).items():
                 vacancies_in_table.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'], vacancies['average_salary']])
 
             TABLE_DATA_HEADERS.append(vacancies_in_table)
