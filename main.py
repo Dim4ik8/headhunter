@@ -115,12 +115,12 @@ def main():
     try:
 
         for language in LANGUAGES:
-            a = []
+            vacancies_in_table = []
             get_developer_salary_info_for_superJob(language)
             for key, value in get_developer_salary_info_for_superJob(language).items():
-                a.extend([key, value['vacancies_found'], value['vacancies_processed'], value['average_salary']])
+                vacancies_in_table.extend([key, value['vacancies_found'], value['vacancies_processed'], value['average_salary']])
 
-            TABLE_DATA_HEADERS.append(a)
+            TABLE_DATA_HEADERS.append(vacancies_in_table)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:\n{0}".format(error))
 
@@ -130,12 +130,12 @@ def main():
     try:
 
         for language in LANGUAGES:
-            a = []
+            vacancies_in_table = []
             get_developer_salary_info(language)
             for language, vacancies in get_developer_salary_info(language).items():
-                a.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'], vacancies['average_salary']])
+                vacancies_in_table.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'], vacancies['average_salary']])
 
-            TABLE_DATA_HEADERS.append(a)
+            TABLE_DATA_HEADERS.append(vacancies_in_table)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:\n{0}".format(error))
 
