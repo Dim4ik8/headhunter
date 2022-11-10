@@ -34,7 +34,7 @@ def predict_rub_salary_for_superJob(vacancy):
 
 
 def get_developer_salary_for_hh(language):
-    list_of_vacancies = []
+    vacancies_on_hh = []
 
     for page in count(0):
 
@@ -46,7 +46,7 @@ def get_developer_salary_for_hh(language):
         vacancies = page_response.json()
 
         if vacancies['items']:
-            list_of_vacancies.append(vacancies)
+            vacancies_on_hh.append(vacancies)
 
         else:
             break
@@ -54,7 +54,7 @@ def get_developer_salary_for_hh(language):
     statistics_for_salary = {}
     vacancies_processed = 0
     sum_of_salaries = 0
-    for page in list_of_vacancies:
+    for page in vacancies_on_hh:
 
         for vacancy in page['items']:
             salary = predict_rub_salary(vacancy)
@@ -64,7 +64,7 @@ def get_developer_salary_for_hh(language):
 
     average_salary = round((sum_of_salaries) / vacancies_processed)
 
-    statistics_for_salary[language] = {'vacancies_found': list_of_vacancies[0]['found']}
+    statistics_for_salary[language] = {'vacancies_found': vacancies_on_hh[0]['found']}
     statistics_for_salary[language].update({'vacancies_processed': vacancies_processed})
     statistics_for_salary[language].update({'average_salary': average_salary})
 
@@ -72,7 +72,7 @@ def get_developer_salary_for_hh(language):
 
 
 def get_developer_salary_for_superJob(language):
-    list_of_vacancies = []
+    vacancies_on_superjob = []
     secret_key = os.getenv('SUPERJOB_KEY')
     for page in count(0):
 
@@ -84,7 +84,7 @@ def get_developer_salary_for_superJob(language):
         vacancies = response.json()
 
         if vacancies['objects']:
-            list_of_vacancies.append(vacancies)
+            vacancies_on_superjob.append(vacancies)
 
         else:
             break
@@ -92,7 +92,7 @@ def get_developer_salary_for_superJob(language):
     statistics_for_salary = {}
     vacancies_processed = 0
     sum_of_salaries = 0
-    for page in list_of_vacancies:
+    for page in vacancies_on_superjob:
 
         for vacancy in page['objects']:
             salary = predict_rub_salary_for_superJob(vacancy)
@@ -102,7 +102,7 @@ def get_developer_salary_for_superJob(language):
 
     average_salary = round((sum_of_salaries) / vacancies_processed)
 
-    statistics_for_salary[language] = {'vacancies_found': list_of_vacancies[0]['total']}
+    statistics_for_salary[language] = {'vacancies_found': vacancies_on_superjob[0]['total']}
     statistics_for_salary[language].update({'vacancies_processed': vacancies_processed})
     statistics_for_salary[language].update({'average_salary': average_salary})
 
