@@ -132,8 +132,8 @@ def main():
         for language in LANGUAGES:
             a = []
             get_developer_salary_info(language)
-            for key, value in get_developer_salary_info(language).items():
-                a.extend([key, value['vacancies_found'], value['vacancies_processed'], value['average_salary']])
+            for language, vacancies in get_developer_salary_info(language).items():
+                a.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'], vacancies['average_salary']])
 
             TABLE_DATA_HEADERS.append(a)
     except requests.exceptions.HTTPError as error:
