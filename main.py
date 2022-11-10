@@ -57,10 +57,10 @@ def get_developer_salary_info(language):
     for page in list_of_vacancies:
 
         for vacancy in page['items']:
-
-            if predict_rub_salary(vacancy):
+            salary = predict_rub_salary(vacancy)
+            if salary:
                 vacancies_processed += 1
-                sum_of_salaries += predict_rub_salary(vacancy)
+                sum_of_salaries += salary
 
     average_salary = round((sum_of_salaries) / vacancies_processed)
 
@@ -95,10 +95,10 @@ def get_developer_salary_info_for_superJob(language):
     for page in list_of_vacancies:
 
         for vacancy in page['objects']:
-
-            if predict_rub_salary_for_superJob(vacancy):
+            salary = predict_rub_salary_for_superJob(vacancy)
+            if salary:
                 vacancies_processed += 1
-                sum_of_salaries += predict_rub_salary_for_superJob(vacancy)
+                sum_of_salaries += salary
 
     average_salary = round((sum_of_salaries) / vacancies_processed)
 
@@ -116,7 +116,6 @@ def main():
 
         for language in LANGUAGES:
             vacancies_in_table = []
-            get_developer_salary_info_for_superJob(language)
             for key, value in get_developer_salary_info_for_superJob(language).items():
                 vacancies_in_table.extend([key, value['vacancies_found'], value['vacancies_processed'], value['average_salary']])
 
@@ -131,7 +130,6 @@ def main():
 
         for language in LANGUAGES:
             vacancies_in_table = []
-            get_developer_salary_info(language)
             for language, vacancies in get_developer_salary_info(language).items():
                 vacancies_in_table.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'], vacancies['average_salary']])
 
