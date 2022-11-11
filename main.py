@@ -65,9 +65,13 @@ def get_developer_salary_for_hh(language):
         average_salary = round((sum_of_salaries) / vacancies_processed)
     except ZeroDivisionError:
         print('Wrong data from server.. Try one more time')
-    statistics_for_salary[language] = {'vacancies_found': vacancies_on_hh[0]['found']}
-    statistics_for_salary[language].update({'vacancies_processed': vacancies_processed})
-    statistics_for_salary[language].update({'average_salary': average_salary})
+
+    statistics_for_salary = {
+        language: {'vacancies_found': vacancies_on_hh[0]['found'],
+                    'vacancies_processed': vacancies_processed,
+                    'average_salary': average_salary
+                    }
+    }
 
     return statistics_for_salary
 
@@ -104,9 +108,12 @@ def get_developer_salary_for_superJob(language, token):
         average_salary = round((sum_of_salaries) / vacancies_processed)
     except ZeroDivisionError:
         print('Wrong data from server.. Try one more time')
-    statistics_for_salary[language] = {'vacancies_found': vacancies_on_superjob[0]['total']}
-    statistics_for_salary[language].update({'vacancies_processed': vacancies_processed})
-    statistics_for_salary[language].update({'average_salary': average_salary})
+    statistics_for_salary = {
+        language: {'vacancies_found': vacancies_on_superjob[0]['total'],
+                   'vacancies_processed': vacancies_processed,
+                   'average_salary': average_salary
+                   }
+    }
 
     return statistics_for_salary
 
