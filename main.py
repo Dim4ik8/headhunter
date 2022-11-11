@@ -71,13 +71,13 @@ def get_developer_salary_for_hh(language):
     return statistics_for_salary
 
 
-def get_developer_salary_for_superJob(language):
+def get_developer_salary_for_superJob(language, token):
     vacancies_on_superjob = []
-    secret_key = os.getenv('SUPERJOB_KEY')
+
     for page in count(0):
 
         params = {'keyword': f'программист {language}', 'page': {page}}
-        headers = {'X-Api-App-Id': secret_key}
+        headers = {'X-Api-App-Id': token}
         response = requests.get(SUPERJOB_URL, params=params, headers=headers)
         response.raise_for_status()
 
@@ -111,12 +111,12 @@ def get_developer_salary_for_superJob(language):
 
 def main():
     load_dotenv()
-
+    token = os.getenv('SUPERJOB_KEY')
     try:
 
         for language in LANGUAGES:
             vacancies_in_table = []
-            for key, value in get_developer_salary_for_superJob(language).items():
+            for key, value in get_developer_salary_for_superJob(language, token).items():
                 vacancies_in_table.extend([key, value['vacancies_found'], value['vacancies_processed'], value['average_salary']])
 
             TABLE_DATA_HEADERS.append(vacancies_in_table)
