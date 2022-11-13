@@ -10,7 +10,7 @@ LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Sw
 TABLE_DATA_HEADERS = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
 
 
-def predict_rub_salary_from_site(vacancy, site=None):
+def predict_rub_salary_from_site(vacancy, site):
     if site == 'hh':
         if not vacancy['salary'] or not vacancy['salary']['currency'] == "RUR":
             return None
