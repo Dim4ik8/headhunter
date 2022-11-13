@@ -1,7 +1,6 @@
 venv/
 .idea/
 11.json
-rrr.py
 __pycache__/
 .env
 ttt.py
