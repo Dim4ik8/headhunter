@@ -7,7 +7,7 @@ import os
 HH_URL = 'https://api.hh.ru/vacancies/'
 SUPERJOB_URL = 'https://api.superjob.ru/2.0/vacancies/'
 LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
-TABLE_DATA_HEADERS = [['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']]
+HEADERS_FOR_VACANCIES_TABLE = ['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']
 
 
 def predict_rub_salary_from_site(vacancy, site):
@@ -120,34 +120,38 @@ def get_developer_salary_for_superJob(language, token):
 def main():
     load_dotenv()
     token = os.getenv('SUPERJOB_KEY')
-    try:
+    vacancies_table_from_superjob = []
 
+    try:
+        vacancies_table_from_superjob.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
             vacancies_in_table = []
-            for key, value in get_developer_salary_for_superJob(language, token).items():
-                vacancies_in_table.extend(
-                    [key, value['vacancies_found'], value['vacancies_processed'], value['average_salary']])
+            for language, vacancies in get_developer_salary_for_superJob(language, token).items():
+                vacancies_in_table.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
+                                           vacancies['average_salary']])
 
-            TABLE_DATA_HEADERS.append(vacancies_in_table)
+            vacancies_table_from_superjob.append(vacancies_in_table)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:\n{0}".format(error))
 
-    table = AsciiTable(TABLE_DATA_HEADERS, title='SuperJobMoscow')
+    table = AsciiTable(vacancies_table_from_superjob, title='SuperJobMoscow')
     print(table.table)
 
+    vacancies_table_from_hh = []
     try:
 
+        vacancies_table_from_hh.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
             vacancies_in_table = []
             for language, vacancies in get_developer_salary_for_hh(language).items():
                 vacancies_in_table.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
                                            vacancies['average_salary']])
 
-            TABLE_DATA_HEADERS.append(vacancies_in_table)
+            vacancies_table_from_hh.append(vacancies_in_table)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:\n{0}".format(error))
 
-    table = AsciiTable(TABLE_DATA_HEADERS, title='HeadhunterMoscow')
+    table = AsciiTable(vacancies_table_from_hh, title='HeadhunterMoscow')
     print(table.table)
 
 
