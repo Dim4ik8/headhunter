@@ -10,6 +10,33 @@ LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Sw
 HEADERS_FOR_VACANCIES_TABLE = ['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']
 
 
+def print_moscow_hh_vacancies(url, period=None):
+    params = {'text': f'программист', 'search_field': 'name', 'premium': True, 'area': '1', 'page': '1',
+              'period': period}
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+
+    vacancies = response.json()
+    print(f"Всего найдено {vacancies['found']} вакансий")
+    if vacancies:
+        for vacancy in vacancies['items']:
+            print(vacancy['name'])
+
+
+def print_moscow_superjob_vacancies(url, token):
+    params = {'keyword': f'Программист', 'page': '1', 'town': 'Москва', 'profession_only': '1'}
+    headers = {'X-Api-App-Id': token}
+    response = requests.get(SUPERJOB_URL, params=params, headers=headers)
+    response.raise_for_status()
+
+    vacancies = response.json()
+
+    if vacancies:
+
+        for vacancy in vacancies['objects']:
+            print(f"{vacancy['profession']}, {vacancy['town']['title']}")
+
+
 def predict_rub_salary_from_site(vacancy, site):
     if site == 'hh':
         if not vacancy['salary'] or not vacancy['salary']['currency'] == "RUR":
@@ -120,6 +147,11 @@ def get_developer_salary_for_superJob(language, token):
 def main():
     load_dotenv()
     token = os.getenv('SUPERJOB_KEY')
+
+    print_moscow_hh_vacancies(HH_URL, 30)
+
+    print_moscow_superjob_vacancies(SUPERJOB_URL, token=token)
+
     vacancies_table_from_superjob = []
 
     try:
