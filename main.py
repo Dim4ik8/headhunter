@@ -145,38 +145,38 @@ def main():
         for vacancy in vacancies['objects']:
             print(f"{vacancy['profession']}, {vacancy['town']['title']}")
 
-    vacancies_table_from_superjob = []
+    superjob_vacancies = []
 
     try:
-        vacancies_table_from_superjob.append(HEADERS_FOR_VACANCIES_TABLE)
+        superjob_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
-            vacancies_in_table = []
+            statistics = []
             for language, vacancies in get_developer_salary_for_superJob(language, token).items():
-                vacancies_in_table.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
+                statistics.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
                                            vacancies['average_salary']])
 
-            vacancies_table_from_superjob.append(vacancies_in_table)
+            superjob_vacancies.append(statistics)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:{0}".format(error))
 
-    table = AsciiTable(vacancies_table_from_superjob, title='SuperJobMoscow')
+    table = AsciiTable(superjob_vacancies, title='SuperJobMoscow')
     print(table.table)
 
-    vacancies_table_from_hh = []
+    hh_vacancies= []
     try:
 
-        vacancies_table_from_hh.append(HEADERS_FOR_VACANCIES_TABLE)
+        hh_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
-            vacancies_in_table = []
+            statistics = []
             for language, vacancies in get_developer_salary_for_hh(language).items():
-                vacancies_in_table.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
+                statistics.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
                                            vacancies['average_salary']])
 
-            vacancies_table_from_hh.append(vacancies_in_table)
+            hh_vacancies.append(statistics)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:\n{0}".format(error))
 
-    table = AsciiTable(vacancies_table_from_hh, title='HeadhunterMoscow')
+    table = AsciiTable(hh_vacancies, title='HeadhunterMoscow')
     print(table.table)
 
 
