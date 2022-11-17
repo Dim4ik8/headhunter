@@ -10,31 +10,32 @@ LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Sw
 HEADERS_FOR_VACANCIES_TABLE = ['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']
 
 
-def predict_rub_salary_from_site(vacancy, site):
-    if site == 'hh':
-        if not vacancy['salary'] or not vacancy['salary']['currency'] == "RUR":
-            return None
-        else:
-            if vacancy['salary']['from'] and vacancy['salary']['to']:
-                return (int(vacancy['salary']['from']) + int(vacancy['salary']['to'])) / 2
-            elif vacancy['salary']['from'] and not vacancy['salary']['to']:
-                return int(vacancy['salary']['from']) * 1.2
-            elif not vacancy['salary']['from'] and vacancy['salary']['to']:
-                return int(vacancy['salary']['to']) * 0.8
-    elif site == 'superjob':
+def avg_salary(salary_from, salary_to):
+    if salary_from and not salary_to:
+        average_salary = int(salary_from) * 1.2
 
-        if (vacancy['payment_from'] or vacancy['payment_to']) and vacancy['currency'] == "rub":
-            if vacancy['payment_from'] and vacancy['payment_to']:
-                return (int(vacancy['payment_from']) + int(vacancy['payment_to'])) / 2
-            if vacancy['payment_from']:
-                return int(vacancy['payment_from']) * 1.2
-            if vacancy['payment_to']:
-                return int(vacancy['payment_to']) * 0.8
-        else:
-            return None
+    elif not salary_from and salary_to:
+        average_salary = int(salary_to) * 0.8
+
+    else:
+        average_salary = (int(salary_from) + int(salary_to)) / 2
+
+    return average_salary
 
 
-def get_statistics_for_salary_on_hh(language):
+def predict_rub_salary_from_hh(vacancy):
+    if vacancy['salary'] and vacancy['salary']['currency'] == "RUR":
+        average_salary = avg_salary(vacancy['salary']['from'], vacancy['salary']['to'])
+        return average_salary
+
+
+def predict_rub_salary_from_superjob(vacancy):
+    if (vacancy['payment_from'] or vacancy['payment_to']) and vacancy['currency'] == "rub":
+        average_salary = avg_salary(vacancy['payment_from'], vacancy['payment_to'])
+        return average_salary
+
+
+def get_salary_statistics_on_hh(language):
     hh_vacancies = []
 
     for page in count(0):
@@ -57,7 +58,7 @@ def get_statistics_for_salary_on_hh(language):
     for page in hh_vacancies:
 
         for vacancy in page['items']:
-            salary = predict_rub_salary_from_site(vacancy, 'hh')
+            salary = predict_rub_salary_from_hh(vacancy)
             if salary:
                 vacancies_processed += 1
                 sum_of_salaries += salary
@@ -76,7 +77,7 @@ def get_statistics_for_salary_on_hh(language):
     return salary_statistics
 
 
-def get_statistics_for_salary_on_superJob(language, token):
+def get_salary_statistics_on_superJob(language, token):
     superjob_vacancies = []
 
     for page in count(0):
@@ -99,7 +100,7 @@ def get_statistics_for_salary_on_superJob(language, token):
     for page in superjob_vacancies:
 
         for vacancy in page['objects']:
-            salary = predict_rub_salary_from_site(vacancy, 'superjob')
+            salary = predict_rub_salary_from_superjob(vacancy)
             if salary:
                 vacancies_processed += 1
                 sum_of_salaries += salary
@@ -132,6 +133,8 @@ def main():
         for vacancy in vacancies['items']:
             print(vacancy['name'])
 
+    print()
+
     # Выводим в консоль вакансии с superjob.ru только по Москве (первую страницу)
     params = {'keyword': 'Программист', 'page': '1', 'town': 'Москва', 'profession_only': '1'}
     headers = {'X-Api-App-Id': token}
@@ -151,9 +154,9 @@ def main():
         superjob_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
             statistics = []
-            for language, vacancies in get_statistics_for_salary_on_superJob(language, token).items():
+            for language, vacancies in get_salary_statistics_on_superJob(language, token).items():
                 statistics.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
-                                           vacancies['average_salary']])
+                                   vacancies['average_salary']])
 
             superjob_vacancies.append(statistics)
     except requests.exceptions.HTTPError as error:
@@ -162,15 +165,15 @@ def main():
     table = AsciiTable(superjob_vacancies, title='SuperJobMoscow')
     print(table.table)
 
-    hh_vacancies= []
+    hh_vacancies = []
     try:
 
         hh_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
             statistics = []
-            for language, vacancies in get_statistics_for_salary_on_hh(language).items():
+            for language, vacancies in get_salary_statistics_on_hh(language).items():
                 statistics.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
-                                           vacancies['average_salary']])
+                                   vacancies['average_salary']])
 
             hh_vacancies.append(statistics)
     except requests.exceptions.HTTPError as error:
