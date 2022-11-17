@@ -66,14 +66,14 @@ def get_statistics_for_salary_on_hh(language):
     except ZeroDivisionError:
         print('Wrong data from server.. Try one more time')
 
-    statistics_for_salary = {
+    salary_statistics = {
         language: {'vacancies_found': hh_vacancies[0]['found'],
                    'vacancies_processed': vacancies_processed,
                    'average_salary': average_salary
                    }
     }
 
-    return statistics_for_salary
+    return salary_statistics
 
 
 def get_statistics_for_salary_on_superJob(language, token):
@@ -107,14 +107,14 @@ def get_statistics_for_salary_on_superJob(language, token):
         average_salary = round((sum_of_salaries) / vacancies_processed)
     except ZeroDivisionError:
         print('Wrong data from server.. Try one more time')
-    statistics_for_salary = {
+    salary_statistics = {
         language: {'vacancies_found': superjob_vacancies[0]['total'],
                    'vacancies_processed': vacancies_processed,
                    'average_salary': average_salary
                    }
     }
 
-    return statistics_for_salary
+    return salary_statistics
 
 
 def main():
