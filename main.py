@@ -6,8 +6,10 @@ import os
 
 HH_URL = 'https://api.hh.ru/vacancies/'
 SUPERJOB_URL = 'https://api.superjob.ru/2.0/vacancies/'
-LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
-HEADERS_FOR_VACANCIES_TABLE = ['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']
+LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP',
+             'C#', 'C', 'Go', 'Swift', 'Scala']
+HEADERS_FOR_VACANCIES_TABLE = ['Язык программирования', 'Вакансий найдено',
+                               'Вакансий обработано', 'Средняя зарплата']
 
 
 def avg_salary(salary_from, salary_to):
@@ -122,8 +124,8 @@ def main():
     load_dotenv()
     token = os.getenv('SUPERJOB_KEY')
     # Выводим в консоль вакансии с hh.ru только по Москве (первую страницу)
-    params = {'text': 'программист', 'search_field': 'name', 'premium': True, 'area': '1', 'page': '1',
-              'period': '30'}
+    params = {'text': 'программист', 'search_field': 'name', 'premium': True,
+              'area': '1', 'page': '1', 'period': '30'}
     response = requests.get(HH_URL, params=params)
     response.raise_for_status()
 
@@ -155,8 +157,8 @@ def main():
         for language in LANGUAGES:
             statistics = []
             for language, vacancies in get_salary_statistics_on_superJob(language, token).items():
-                statistics.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
-                                   vacancies['average_salary']])
+                statistics.extend([language, vacancies['vacancies_found'],
+                                   vacancies['vacancies_processed'], vacancies['average_salary']])
 
             superjob_vacancies.append(statistics)
     except requests.exceptions.HTTPError as error:
@@ -172,8 +174,8 @@ def main():
         for language in LANGUAGES:
             statistics = []
             for language, vacancies in get_salary_statistics_on_hh(language).items():
-                statistics.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
-                                   vacancies['average_salary']])
+                statistics.extend([language, vacancies['vacancies_found'],
+                                   vacancies['vacancies_processed'], vacancies['average_salary']])
 
             hh_vacancies.append(statistics)
     except requests.exceptions.HTTPError as error:
