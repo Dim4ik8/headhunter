@@ -12,7 +12,7 @@ HEADERS_FOR_VACANCIES_TABLE = ['Язык программирования', 'В�
                                'Вакансий обработано', 'Средняя зарплата']
 
 
-def avg_salary(salary_from, salary_to):
+def get_avg_salary(salary_from, salary_to):
     if salary_from and not salary_to:
         average_salary = int(salary_from) * 1.2
 
@@ -27,13 +27,13 @@ def avg_salary(salary_from, salary_to):
 
 def predict_rub_salary_from_hh(vacancy):
     if vacancy['salary'] and vacancy['salary']['currency'] == "RUR":
-        average_salary = avg_salary(vacancy['salary']['from'], vacancy['salary']['to'])
+        average_salary = get_avg_salary(vacancy['salary']['from'], vacancy['salary']['to'])
         return average_salary
 
 
 def predict_rub_salary_from_superjob(vacancy):
     if (vacancy['payment_from'] or vacancy['payment_to']) and vacancy['currency'] == "rub":
-        average_salary = avg_salary(vacancy['payment_from'], vacancy['payment_to'])
+        average_salary = get_avg_salary(vacancy['payment_from'], vacancy['payment_to'])
         return average_salary
 
 
@@ -84,7 +84,7 @@ def get_salary_statistics_on_superJob(language, token):
 
     for page in count(0):
 
-        params = {'keyword': f'программист {language}', 'page': {page}}
+        params = {'keyword': f'программист {language}', 'page': {page}, 'town': 'Москва'}
         headers = {'X-Api-App-Id': token}
         response = requests.get(SUPERJOB_URL, params=params, headers=headers)
         response.raise_for_status()
@@ -123,35 +123,8 @@ def get_salary_statistics_on_superJob(language, token):
 def main():
     load_dotenv()
     token = os.getenv('SUPERJOB_KEY')
-    # Выводим в консоль вакансии с hh.ru только по Москве (первую страницу)
-    params = {'text': 'программист', 'search_field': 'name', 'premium': True,
-              'area': '1', 'page': '1', 'period': '30'}
-    response = requests.get(HH_URL, params=params)
-    response.raise_for_status()
-
-    vacancies = response.json()
-    print(f"Всего найдено {vacancies['found']} вакансий на headhunter.ru")
-    if vacancies:
-        for vacancy in vacancies['items']:
-            print(vacancy['name'])
-
-    print()
-
-    # Выводим в консоль вакансии с superjob.ru только по Москве (первую страницу)
-    params = {'keyword': 'Программист', 'page': '1', 'town': 'Москва', 'profession_only': '1'}
-    headers = {'X-Api-App-Id': token}
-    response = requests.get(SUPERJOB_URL, params=params, headers=headers)
-    response.raise_for_status()
-
-    vacancies = response.json()
-    print(f"Всего найдено {vacancies['total']} вакансий на superjob.ru")
-    if vacancies:
-
-        for vacancy in vacancies['objects']:
-            print(f"{vacancy['profession']}, {vacancy['town']['title']}")
 
     superjob_vacancies = []
-
     try:
         superjob_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
@@ -169,7 +142,6 @@ def main():
 
     hh_vacancies = []
     try:
-
         hh_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
             statistics = []
