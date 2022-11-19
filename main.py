@@ -125,36 +125,36 @@ def main():
     load_dotenv()
     token = os.getenv('SUPERJOB_KEY')
 
-    superjob_vacancies = []
+    superjob_table_strings = []
     try:
-        superjob_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
+        superjob_table_strings.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
             statistics = []
             for language, vacancies in get_salary_statistics_on_superJob(language, token).items():
                 statistics.extend([language, vacancies['vacancies_found'],
                                    vacancies['vacancies_processed'], vacancies['average_salary']])
 
-            superjob_vacancies.append(statistics)
+            superjob_table_strings.append(statistics)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:{0}".format(error))
 
-    table = AsciiTable(superjob_vacancies, title='SuperJobMoscow')
+    table = AsciiTable(superjob_table_strings, title='SuperJobMoscow')
     print(table.table)
 
-    hh_vacancies = []
+    hh_table_strings = []
     try:
-        hh_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
+        hh_table_strings.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
             statistics = []
             for language, vacancies in get_salary_statistics_on_hh(language).items():
                 statistics.extend([language, vacancies['vacancies_found'],
                                    vacancies['vacancies_processed'], vacancies['average_salary']])
 
-            hh_vacancies.append(statistics)
+            hh_table_strings.append(statistics)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:\n{0}".format(error))
 
-    table = AsciiTable(hh_vacancies, title='HeadhunterMoscow')
+    table = AsciiTable(hh_table_strings, title='HeadhunterMoscow')
     print(table.table)
 
 
