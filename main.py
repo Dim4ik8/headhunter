@@ -40,11 +40,11 @@ def predict_rub_salary_from_superjob(vacancy):
 
 def get_salary_statistics_on_hh(language):
     hh_vacancies = []
-
+    moscow = '1'
     for page in count(0):
 
         params = {'text': f'программист {language}', 'search_field': 'name', 'premium': True,
-                  'area': '1', 'page': {page}}
+                  'area': moscow, 'page': {page}}
         page_response = requests.get(HH_URL, params=params)
         page_response.raise_for_status()
 
