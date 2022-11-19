@@ -7,10 +7,24 @@ import logging
 
 HH_URL = 'https://api.hh.ru/vacancies/'
 SUPERJOB_URL = 'https://api.superjob.ru/2.0/vacancies/'
-LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP',
-             'C#', 'C', 'Go', 'Swift', 'Scala']
-HEADERS_FOR_VACANCIES_TABLE = ['Язык программирования', 'Вакансий найдено',
-                               'Вакансий обработано', 'Средняя зарплата']
+LANGUAGES = [
+    'Javascript',
+    'Java',
+    'Python',
+    'Ruby',
+    'PHP',
+    'C#',
+    'C',
+    'Go',
+    'Swift',
+    'Scala'
+]
+HEADERS_FOR_VACANCIES_TABLE = [
+    'Язык программирования',
+    'Вакансий найдено',
+    'Вакансий обработано',
+    'Средняя зарплата'
+]
 
 
 def get_avg_salary(salary_from, salary_to):
@@ -43,8 +57,13 @@ def get_salary_statistics_on_hh(language):
     moscow = '1'
     for page in count(0):
 
-        params = {'text': f'программист {language}', 'search_field': 'name', 'premium': True,
-                  'area': moscow, 'page': {page}}
+        params = {
+            'text': f'программист {language}',
+            'search_field': 'name',
+            'premium': True,
+            'area': moscow,
+            'page': {page}
+        }
         page_response = requests.get(HH_URL, params=params)
         page_response.raise_for_status()
 
@@ -71,10 +90,11 @@ def get_salary_statistics_on_hh(language):
         logging.error('Wrong data from server.. Try one more time')
 
     salary_statistics = {
-        language: {'vacancies_found': hh_vacancies[0]['found'],
-                   'vacancies_processed': vacancies_processed,
-                   'average_salary': average_salary
-                   }
+        language: {
+            'vacancies_found': hh_vacancies[0]['found'],
+            'vacancies_processed': vacancies_processed,
+            'average_salary': average_salary
+        }
     }
 
     return salary_statistics
@@ -85,7 +105,11 @@ def get_salary_statistics_on_superJob(language, token):
 
     for page in count(0):
 
-        params = {'keyword': f'программист {language}', 'page': {page}, 'town': 'Москва'}
+        params = {
+            'keyword': f'программист {language}',
+            'page': {page},
+            'town': 'Москва'
+        }
         headers = {'X-Api-App-Id': token}
         response = requests.get(SUPERJOB_URL, params=params, headers=headers)
         response.raise_for_status()
@@ -112,10 +136,11 @@ def get_salary_statistics_on_superJob(language, token):
     except ZeroDivisionError:
         logging.error('Wrong data from server.. Try one more time')
     salary_statistics = {
-        language: {'vacancies_found': superjob_vacancies[0]['total'],
-                   'vacancies_processed': vacancies_processed,
-                   'average_salary': average_salary
-                   }
+        language: {
+            'vacancies_found': superjob_vacancies[0]['total'],
+            'vacancies_processed': vacancies_processed,
+            'average_salary': average_salary
+        }
     }
 
     return salary_statistics
@@ -131,8 +156,11 @@ def main():
         for language in LANGUAGES:
             statistics = []
             for language, vacancies in get_salary_statistics_on_superJob(language, token).items():
-                statistics.extend([language, vacancies['vacancies_found'],
-                                   vacancies['vacancies_processed'], vacancies['average_salary']])
+                statistics.extend(
+                    [language, vacancies['vacancies_found'],
+                    vacancies['vacancies_processed'],
+                    vacancies['average_salary']]
+                )
 
             superjob_table_strings.append(statistics)
     except requests.exceptions.HTTPError as error:
@@ -147,8 +175,11 @@ def main():
         for language in LANGUAGES:
             statistics = []
             for language, vacancies in get_salary_statistics_on_hh(language).items():
-                statistics.extend([language, vacancies['vacancies_found'],
-                                   vacancies['vacancies_processed'], vacancies['average_salary']])
+                statistics.extend(
+                    [language, vacancies['vacancies_found'],
+                    vacancies['vacancies_processed'],
+                    vacancies['average_salary']]
+                )
 
             hh_table_strings.append(statistics)
     except requests.exceptions.HTTPError as error:
