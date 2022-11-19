@@ -3,6 +3,7 @@ from itertools import count
 from terminaltables import AsciiTable
 from dotenv import load_dotenv
 import os
+import logging
 
 HH_URL = 'https://api.hh.ru/vacancies/'
 SUPERJOB_URL = 'https://api.superjob.ru/2.0/vacancies/'
@@ -43,7 +44,7 @@ def get_salary_statistics_on_hh(language):
     for page in count(0):
 
         params = {'text': f'программист {language}', 'search_field': 'name', 'premium': True,
-                  'area': '1, 'page': {page}}
+                  'area': '1', 'page': {page}}
         page_response = requests.get(HH_URL, params=params)
         page_response.raise_for_status()
 
@@ -67,7 +68,7 @@ def get_salary_statistics_on_hh(language):
     try:
         average_salary = round((sum_of_salaries) / vacancies_processed)
     except ZeroDivisionError:
-        print('Wrong data from server.. Try one more time')
+        logging.error('Wrong data from server.. Try one more time')
 
     salary_statistics = {
         language: {'vacancies_found': hh_vacancies[0]['found'],
@@ -109,7 +110,7 @@ def get_salary_statistics_on_superJob(language, token):
     try:
         average_salary = round((sum_of_salaries) / vacancies_processed)
     except ZeroDivisionError:
-        print('Wrong data from server.. Try one more time')
+        logging.error('Wrong data from server.. Try one more time')
     salary_statistics = {
         language: {'vacancies_found': superjob_vacancies[0]['total'],
                    'vacancies_processed': vacancies_processed,
