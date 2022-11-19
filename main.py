@@ -6,62 +6,38 @@ import os
 
 HH_URL = 'https://api.hh.ru/vacancies/'
 SUPERJOB_URL = 'https://api.superjob.ru/2.0/vacancies/'
-LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP', 'C#', 'C', 'Go', 'Swift', 'Scala']
-HEADERS_FOR_VACANCIES_TABLE = ['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата']
+LANGUAGES = ['Javascript', 'Java', 'Python', 'Ruby', 'PHP',
+             'C#', 'C', 'Go', 'Swift', 'Scala']
+HEADERS_FOR_VACANCIES_TABLE = ['Язык программирования', 'Вакансий найдено',
+                               'Вакансий обработано', 'Средняя зарплата']
 
 
-def print_moscow_hh_vacancies(url, period=None):
-    params = {'text': f'программист', 'search_field': 'name', 'premium': True, 'area': '1', 'page': '1',
-              'period': period}
-    response = requests.get(url, params=params)
-    response.raise_for_status()
+def get_avg_salary(salary_from, salary_to):
+    if salary_from and not salary_to:
+        average_salary = int(salary_from) * 1.2
 
-    vacancies = response.json()
-    print(f"Всего найдено {vacancies['found']} вакансий")
-    if vacancies:
-        for vacancy in vacancies['items']:
-            print(vacancy['name'])
+    elif not salary_from and salary_to:
+        average_salary = int(salary_to) * 0.8
 
+    else:
+        average_salary = (int(salary_from) + int(salary_to)) / 2
 
-def print_moscow_superjob_vacancies(url, token):
-    params = {'keyword': f'Программист', 'page': '1', 'town': 'Москва', 'profession_only': '1'}
-    headers = {'X-Api-App-Id': token}
-    response = requests.get(SUPERJOB_URL, params=params, headers=headers)
-    response.raise_for_status()
-
-    vacancies = response.json()
-
-    if vacancies:
-
-        for vacancy in vacancies['objects']:
-            print(f"{vacancy['profession']}, {vacancy['town']['title']}")
+    return average_salary
 
 
-def predict_rub_salary_from_site(vacancy, site):
-    if site == 'hh':
-        if not vacancy['salary'] or not vacancy['salary']['currency'] == "RUR":
-            return None
-        else:
-            if vacancy['salary']['from'] and vacancy['salary']['to']:
-                return (int(vacancy['salary']['from']) + int(vacancy['salary']['to'])) / 2
-            elif vacancy['salary']['from'] and not vacancy['salary']['to']:
-                return int(vacancy['salary']['from']) * 1.2
-            elif not vacancy['salary']['from'] and vacancy['salary']['to']:
-                return int(vacancy['salary']['to']) * 0.8
-    elif site == 'superjob':
-
-        if (vacancy['payment_from'] or vacancy['payment_to']) and vacancy['currency'] == "rub":
-            if vacancy['payment_from'] and vacancy['payment_to']:
-                return (int(vacancy['payment_from']) + int(vacancy['payment_to'])) / 2
-            if vacancy['payment_from']:
-                return int(vacancy['payment_from']) * 1.2
-            if vacancy['payment_to']:
-                return int(vacancy['payment_to']) * 0.8
-        else:
-            return None
+def predict_rub_salary_from_hh(vacancy):
+    if vacancy['salary'] and vacancy['salary']['currency'] == "RUR":
+        average_salary = get_avg_salary(vacancy['salary']['from'], vacancy['salary']['to'])
+        return average_salary
 
 
-def get_developer_salary_for_hh(language):
+def predict_rub_salary_from_superjob(vacancy):
+    if (vacancy['payment_from'] or vacancy['payment_to']) and vacancy['currency'] == "rub":
+        average_salary = get_avg_salary(vacancy['payment_from'], vacancy['payment_to'])
+        return average_salary
+
+
+def get_salary_statistics_on_hh(language):
     hh_vacancies = []
 
     for page in count(0):
@@ -84,7 +60,7 @@ def get_developer_salary_for_hh(language):
     for page in hh_vacancies:
 
         for vacancy in page['items']:
-            salary = predict_rub_salary_from_site(vacancy, 'hh')
+            salary = predict_rub_salary_from_hh(vacancy)
             if salary:
                 vacancies_processed += 1
                 sum_of_salaries += salary
@@ -93,22 +69,22 @@ def get_developer_salary_for_hh(language):
     except ZeroDivisionError:
         print('Wrong data from server.. Try one more time')
 
-    statistics_for_salary = {
+    salary_statistics = {
         language: {'vacancies_found': hh_vacancies[0]['found'],
                    'vacancies_processed': vacancies_processed,
                    'average_salary': average_salary
                    }
     }
 
-    return statistics_for_salary
+    return salary_statistics
 
 
-def get_developer_salary_for_superJob(language, token):
+def get_salary_statistics_on_superJob(language, token):
     superjob_vacancies = []
 
     for page in count(0):
 
-        params = {'keyword': f'программист {language}', 'page': {page}}
+        params = {'keyword': f'программист {language}', 'page': {page}, 'town': 'Москва'}
         headers = {'X-Api-App-Id': token}
         response = requests.get(SUPERJOB_URL, params=params, headers=headers)
         response.raise_for_status()
@@ -126,7 +102,7 @@ def get_developer_salary_for_superJob(language, token):
     for page in superjob_vacancies:
 
         for vacancy in page['objects']:
-            salary = predict_rub_salary_from_site(vacancy, 'superjob')
+            salary = predict_rub_salary_from_superjob(vacancy)
             if salary:
                 vacancies_processed += 1
                 sum_of_salaries += salary
@@ -134,56 +110,50 @@ def get_developer_salary_for_superJob(language, token):
         average_salary = round((sum_of_salaries) / vacancies_processed)
     except ZeroDivisionError:
         print('Wrong data from server.. Try one more time')
-    statistics_for_salary = {
+    salary_statistics = {
         language: {'vacancies_found': superjob_vacancies[0]['total'],
                    'vacancies_processed': vacancies_processed,
                    'average_salary': average_salary
                    }
     }
 
-    return statistics_for_salary
+    return salary_statistics
 
 
 def main():
     load_dotenv()
     token = os.getenv('SUPERJOB_KEY')
 
-    print_moscow_hh_vacancies(HH_URL, 30)
-
-    print_moscow_superjob_vacancies(SUPERJOB_URL, token=token)
-
-    vacancies_table_from_superjob = []
-
+    superjob_vacancies = []
     try:
-        vacancies_table_from_superjob.append(HEADERS_FOR_VACANCIES_TABLE)
+        superjob_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
-            vacancies_in_table = []
-            for language, vacancies in get_developer_salary_for_superJob(language, token).items():
-                vacancies_in_table.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
-                                           vacancies['average_salary']])
+            statistics = []
+            for language, vacancies in get_salary_statistics_on_superJob(language, token).items():
+                statistics.extend([language, vacancies['vacancies_found'],
+                                   vacancies['vacancies_processed'], vacancies['average_salary']])
 
-            vacancies_table_from_superjob.append(vacancies_in_table)
+            superjob_vacancies.append(statistics)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:{0}".format(error))
 
-    table = AsciiTable(vacancies_table_from_superjob, title='SuperJobMoscow')
+    table = AsciiTable(superjob_vacancies, title='SuperJobMoscow')
     print(table.table)
 
-    vacancies_table_from_hh = []
+    hh_vacancies = []
     try:
-
-        vacancies_table_from_hh.append(HEADERS_FOR_VACANCIES_TABLE)
+        hh_vacancies.append(HEADERS_FOR_VACANCIES_TABLE)
         for language in LANGUAGES:
-            vacancies_in_table = []
-            for language, vacancies in get_developer_salary_for_hh(language).items():
-                vacancies_in_table.extend([language, vacancies['vacancies_found'], vacancies['vacancies_processed'],
-                                           vacancies['average_salary']])
+            statistics = []
+            for language, vacancies in get_salary_statistics_on_hh(language).items():
+                statistics.extend([language, vacancies['vacancies_found'],
+                                   vacancies['vacancies_processed'], vacancies['average_salary']])
 
-            vacancies_table_from_hh.append(vacancies_in_table)
+            hh_vacancies.append(statistics)
     except requests.exceptions.HTTPError as error:
         exit("Can't get data from server:\n{0}".format(error))
 
-    table = AsciiTable(vacancies_table_from_hh, title='HeadhunterMoscow')
+    table = AsciiTable(hh_vacancies, title='HeadhunterMoscow')
     print(table.table)
 
 
