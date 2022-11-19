@@ -67,7 +67,7 @@ def get_developer_salary_for_hh(language):
     for page in count(0):
 
         params = {'text': f'программист {language}', 'search_field': 'name', 'premium': True,
-                  'area': '1', 'page': {page}}
+                  'area': '1, 'page': {page}}
         page_response = requests.get(HH_URL, params=params)
         page_response.raise_for_status()
 
